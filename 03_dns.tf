@@ -1,7 +1,7 @@
 # Creamos un dominio nuevo
 
 resource "digitalocean_domain" "pablokbs" {
-  name = "pablokbs.com"
+  name = "jsinmo.com"
 }
 
 # Add a record to the domain
