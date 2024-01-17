@@ -4,6 +4,6 @@
 
 resource "digitalocean_ssh_key" "key" {
   name       = "key"
-  public_key = file("id_rsa.pub")
+  public_key = file("mi_clave_terraform.pub")
 }
 
