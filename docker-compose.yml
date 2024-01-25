@@ -1,0 +1,19 @@
+
+version: '3'
+services:
+  nagios:
+    image: jasonrivers/nagios:4.4.6
+    ports:
+      - "8080:80"
+    volumes:
+      - nagios_data:/opt/nagios/etc
+      - nagios_custom_plugins:/opt/Custom-Nagios-Plugins
+      - nagiosgraph_var:/opt/nagiosgraph/var
+      - nagiosgraph_etc:/opt/nagiosgraph/etc
+    restart: always
+
+volumes:
+  nagios_data:
+  nagios_custom_plugins:
+  nagiosgraph_var:
+  nagiosgraph_etc:
