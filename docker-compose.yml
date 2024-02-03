@@ -24,7 +24,7 @@ services:
       - PUID=1000  # ID del usuario para el proceso
       - PGID=1000  # ID del grupo para el proceso
       - TZ=Europe/London  # Zona horaria
-      - SERVERURL=${IP_PUBLICO}  # IP del servidor como URL del servidor WireGuard
+      - SERVERADDR=${IP_PUBLICO}  # IP del servidor como URL del servidor WireGuard
       - SERVERPORT=51820  # Puerto del servidor WireGuard
       - PEERS=1  # Número de peers (clientes VPN)
       - PEERDNS=auto  # DNS para los peers
