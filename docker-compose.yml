@@ -1,39 +1,169 @@
 
 version: '3'
 services:
+  # Servicio de Nagios para monitoreo de infraestructura
   nagios:
-    image: jasonrivers/nagios:4.4.6
+    image: jasonrivers/nagios:4.4.6  # Imagen de Docker para Nagios 4.4.6
     ports:
-      - "8080:80"
+      - "8080:80"  # Mapeo del puerto para acceder a la interfaz web de Nagios
     volumes:
-      - nagios_data:/opt/nagios/etc
-      - nagios_custom_plugins:/opt/Custom-Nagios-Plugins
-      - nagiosgraph_var:/opt/nagiosgraph/var
-      - nagiosgraph_etc:/opt/nagiosgraph/etc
-    restart: always
-  
+      - nagios_data:/opt/nagios/etc  # Almacenamiento persistente para configuración de Nagios
+      - nagios_custom_plugins:/opt/Custom-Nagios-Plugins  # Plugins personalizados de Nagios
+      - nagiosgraph_var:/opt/nagiosgraph/var  # Datos de Nagiosgraph
+      - nagiosgraph_etc:/opt/nagiosgraph/etc  # Configuración de Nagiosgraph
+    restart: always  # Política de reinicio automático
+
+  # Servicio de WireGuard para VPN
   wireguard:
-        image: lscr.io/linuxserver/wireguard:latest
-        container_name: wireguard 
-        cap_add:
-        - NET_ADMIN
-        - SYS_MODULE
-        environment:
-        - PUID=1000
-        - PGID=1000
-        - TZ=Europe/London
-        - SERVERURL=wireguard.domain.com #optional
-        - SERVERPORT=51820 #optional
-        - PEERS=1 #optional
-        - PEERDNS=auto #optional
-        - INTERNAL_SUBNET=10.13.13.0 #optional
-        - ALLOWEDIPS=0.0.0.0/0 #optional
-        - LOG_CONFS=true #optional
-        volumes:
-        - /path/to/appdata/config:/config
-        
+    image: lscr.io/linuxserver/wireguard:latest  # Imagen de Docker para WireGuard
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN  # Permiso necesario para modificar la red
+      - SYS_MODULE  # Permiso para cargar módulos del kernel
+    environment:
+      - PUID=1000  # ID del usuario para el proceso
+      - PGID=1000  # ID del grupo para el proceso
+      - TZ=Europe/London  # Zona horaria
+      - SERVERURL=${IP_PUBLICO}  # IP del servidor como URL del servidor WireGuard
+      - SERVERPORT=51820  # Puerto del servidor WireGuard
+      - PEERS=1  # Número de peers (clientes VPN)
+      - PEERDNS=auto  # DNS para los peers
+      - INTERNAL_SUBNET=10.13.13.0  # Subred interna para WireGuard
+      - ALLOWEDIPS=0.0.0.0/0  # IPs permitidas para los clientes VPN
+      - LOG_CONFS=true  # Opcional: para loguear las configuraciones
+    volumes:
+      - wireguard_config:/config  # Almacenamiento persistente para configuración de WireGuard
+    ports:
+      - "51820:51820/udp"  # Mapeo del puerto UDP para las conexiones VPN
+    restart: always  # Política de reinicio automático
+
+  # Servicio de FTP para acceder a archivos, incluidos los de configuración de WireGuard
+  ftp:
+    image: fauria/vsftpd  # Imagen de Docker para un servidor FTP simple
+    environment:
+      - FTP_USER=${FTP_USER}  # Usuario para el acceso FTP, cambialo por un nombre de usuario seguro
+      - FTP_PASS=${FTP_PASS}  # Contraseña para el usuario FTP, usa una contraseña segura
+      - PASV_ADDRESS=${IP_PUBLICO}  # Dirección para el modo pasivo, debe coincidir con la IP pública del servidor
+    volumes:
+      - wireguard_config:/home/vsftpd/miusuario  # Monta la configuración de WireGuard en el directorio del usuario FTP
+    ports:
+      - "20-21:20-21"  # Puertos para el comando FTP y datos
+      - "21100-21110:21100-21110"  # Rango de puertos para el modo pasivo FTP
+    restart: always  # Política de reinicio automático
+
+# Definición de volúmenes para almacenamiento persistente
 volumes:
   nagios_data:
   nagios_custom_plugins:
   nagiosgraph_var:
   nagiosgraph_etc:
+  wireguard_config:  # Volumen para almacenar configuraciones de WireGuard, accesible vía FTP
+
+
+
+
+
+
+
+
+# version: '3'
+# services:
+#   nagios:
+#     image: jasonrivers/nagios:4.4.6
+#     ports:
+#       - "8080:80"
+#     volumes:
+#       - nagios_data:/opt/nagios/etc
+#       - nagios_custom_plugins:/opt/Custom-Nagios-Plugins
+#       - nagiosgraph_var:/opt/nagiosgraph/var
+#       - nagiosgraph_etc:/opt/nagiosgraph/etc
+#     restart: always
+  
+#   wireguard:
+#         image: lscr.io/linuxserver/wireguard:latest
+#         container_name: wireguard 
+#         cap_add:
+#         - NET_ADMIN
+#         - SYS_MODULE
+#         environment:
+#         - PUID=1000
+#         - PGID=1000
+#         - TZ=Europe/London
+#         - SERVERURL=wireguard.domain.com #optional
+#         - SERVERPORT=51820 #optional
+#         - PEERS=1 #optional
+#         - PEERDNS=auto #optional
+#         - INTERNAL_SUBNET=10.13.13.0 #optional
+#         - ALLOWEDIPS=0.0.0.0/0 #optional
+#         - LOG_CONFS=true #optional
+#         volumes:
+#         - /path/to/appdata/config:/config
+        
+# volumes:
+#   nagios_data:
+#   nagios_custom_plugins:
+#   nagiosgraph_var:
+#   nagiosgraph_etc:
+
+
+
+
+
+# # Ejemplo de configuración de WireGuard con un servidor FTP y Nagios generado ChatGPT
+
+
+# version: '3'
+# services:
+#   nagios:
+#     image: jasonrivers/nagios:4.4.6
+#     ports:
+#       - "8080:80"
+#     volumes:
+#       - nagios_data:/opt/nagios/etc
+#       - nagios_custom_plugins:/opt/Custom-Nagios-Plugins
+#       - nagiosgraph_var:/opt/nagiosgraph/var
+#       - nagiosgraph_etc:/opt/nagiosgraph/etc
+#     restart: always
+
+#   wireguard:
+#     image: lscr.io/linuxserver/wireguard:latest
+#     container_name: wireguard
+#     cap_add:
+#       - NET_ADMIN
+#       - SYS_MODULE
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       - TZ=Europe/London
+#       - SERVERURL=142.93.73.136 # Usando la IP del servidor directamente
+#       - SERVERPORT=51820
+#       - PEERS=1
+#       - PEERDNS=auto
+#       - INTERNAL_SUBNET=10.13.13.0
+#       - ALLOWEDIPS=0.0.0.0/0 # Permitir todo el tráfico a través de la VPN
+#       - LOG_CONFS=true
+#     volumes:
+#       - /path/to/appdata/config:/config
+#     ports:
+#       - "51820:51820/udp"
+
+#   ftp:
+#     image: fauria/vsftpd
+#     environment:
+#       - FTP_USER=user # Cambiar según se requiera
+#       - FTP_PASS=password # Cambiar por una contraseña segura
+#       - PASV_ADDRESS=142.93.73.136 # Asegúrate de que esta dirección coincida con la dirección IP pública de tu servidor
+#     volumes:
+#       - ftp_data:/home/vsftpd
+#     ports:
+#       - "20-21:20-21"
+#       - "21100-21110:21100-21110"
+#     restart: always
+
+# volumes:
+#   nagios_data:
+#   nagios_custom_plugins:
+#   nagiosgraph_var:
+#   nagiosgraph_etc:
+#   ftp_data:
+
